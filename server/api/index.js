@@ -1,7 +1,9 @@
 /*jshint esversion: 6, node: true*/
 'use strict';
 const Bitbucket = require('../../APIs/bitbucket/bitbucket');
+const JIRA = require('../../APIs/jira/jira');
 const bitbucketClient = new Bitbucket('localhost', 7990, 'PROJECT_1', 'rep_1', 'admin', 'admin');
+const jiraClient = new JIRA('ensemble.atlassian.net', 443, 'FORTracker', 'F0RTr@cker@Google');
 
 exports.register = function (server, options, next) {
 
@@ -55,6 +57,26 @@ exports.register = function (server, options, next) {
             });
         }
     });
+
+    server.route({
+        method: 'GET',
+        path: '/jira/{key}',
+        handler: function (request, reply) {
+
+            const key = request.params.key;
+
+            console.log('GET TEST - attempting to get JIRA: ' + key);
+            jiraClient.getJira(key, (err, res) => {
+
+                if (err) {
+                    return console.error(err);
+                }
+
+                reply(res);
+            });
+        }
+    });
+
 
     next();
 };
