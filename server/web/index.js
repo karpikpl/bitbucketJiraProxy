@@ -1,3 +1,4 @@
+/*jshint esversion: 6, node: true*/
 'use strict';
 
 exports.register = function (server, options, next) {

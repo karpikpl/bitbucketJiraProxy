@@ -1,3 +1,4 @@
+/*jshint esversion: 6, node: true*/
 'use strict';
 
 const Lab = require('lab');

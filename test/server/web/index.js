@@ -1,3 +1,4 @@
+/*jshint esversion: 6, node: true*/
 'use strict';
 
 const Lab = require('lab');
@@ -51,7 +52,7 @@ lab.experiment('Home Page View', () => {
 
         server.inject(request, (response) => {
 
-            Code.expect(response.result).to.match(/activate the plot device/i);
+            Code.expect(response.result).to.match(/Stash & Jira Proxy/i);
             Code.expect(response.statusCode).to.equal(200);
 
             done();

@@ -1,3 +1,4 @@
+/*jshint esversion: 6, node: true*/
 'use strict';
 
 const Lab = require('lab');
@@ -45,7 +46,7 @@ lab.experiment('Index Plugin', () => {
 
         server.inject(request, (response) => {
 
-            Code.expect(response.result.message).to.match(/welcome to the plot device/i);
+            Code.expect(response.result.message).to.match(/welcome to the Stash & JIRA proxy/i);
             Code.expect(response.statusCode).to.equal(200);
 
             done();

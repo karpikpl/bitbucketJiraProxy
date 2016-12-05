@@ -1,3 +1,4 @@
+/*jshint esversion: 6, node: true*/
 'use strict';
 
 const Confidence = require('confidence');
@@ -10,7 +11,7 @@ const criteria = {
 
 
 const manifest = {
-    $meta: 'This file defines the plot device.',
+    $meta: 'This file defines the proxy.',
     server: {
         debug: {
             request: ['error']
