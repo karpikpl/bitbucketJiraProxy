@@ -24,6 +24,7 @@ exports.register = function (server, options, next) {
             const id = request.query.PULL_REQUEST_ID;
             const title = request.query.PULL_REQUEST_TITLE;
             const version = request.query.PULL_REQUEST_VERSION;
+            const branch = request.query.PULL_REQUEST_FROM_BRANCH;
 
             bitbucketClient.updatePR(title + ' updated!', id, version, (err, res) => {
 
