@@ -33,6 +33,7 @@
   "devDependencies": {
     "code": "3.x.x",
     "lab": "11.x.x",
+    "nock": "^9.0.2",
     "nodemon": "1.x.x"
   }
 }

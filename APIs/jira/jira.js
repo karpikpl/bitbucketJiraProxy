@@ -2,13 +2,11 @@
 'use strict';
 const Https = require('https');
 
-const harmonyKey = /HA-\d+/gi;
-
 class jiraClient {
 
     static getJiraKeys(text) {
 
-        return text.match(harmonyKey);
+        return text.match(/HA-\d+/gi);
     }
 
     constructor(serverUrl, serverPort, username, password) {
