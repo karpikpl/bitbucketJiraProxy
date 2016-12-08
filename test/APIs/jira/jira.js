@@ -5,6 +5,7 @@ const Lab = require('lab');
 const Code = require('code');
 const Nock = require('nock');
 const Jira = require('../../../APIs/jira/jira');
+const Config = require('../../../config');
 
 const lab = exports.lab = Lab.script();
 
@@ -40,16 +41,15 @@ lab.experiment('getJira should return jira data using basic auth', () => {
 
     lab.test('it returns jira data', (done) => {
         // Arrange
-        const jiraUrl = 'jira.server.com';
-        const jira = new Jira(jiraUrl, 443, 'admin', 'admin');
+        const jira = new Jira();
         const key = 'HA-567';
         const jiraData = { key };
 
-        const jiraMock = Nock('https://' + jiraUrl + ':443')
+        const jiraMock = Nock('https://' + Config.get('/jira/host') + ':' + Config.get('/jira/port'))
             .get(`/rest/api/2/issue/${key}?fields=summary,created,status,aggregateprogress,priority,issuetype,customfield_11500,customfield_11700,customfield_10008`)
             .basicAuth({
-                user: 'admin',
-                pass: 'admin'
+                user: Config.get('/jira/user'),
+                pass: Config.get('/jira/pass')
             })
             .reply(200, jiraData)
             .log(console.log);

@@ -1,16 +1,17 @@
 /*jshint esversion: 6, node: true*/
 'use strict';
 const Http = require('http');
+const Config = require('../../config');
 
 class bitbucketClient {
 
-    constructor(serverUrl, serverPort, projectKey, repositorySlug, username, password) {
+    constructor(projectKey, repositorySlug) {
 
-        this.serverUrl = serverUrl;
-        this.serverPort = serverPort;
+        this.serverUrl = Config.get('/stash/host');
+        this.serverPort = Config.get('/stash/port');
         this.projectKey = projectKey;
         this.repositorySlug = repositorySlug;
-        this.auth = 'Basic ' + new Buffer(username + ':' + password).toString('base64');
+        this.auth = 'Basic ' + new Buffer(Config.get('/stash/user') + ':' + Config.get('/stash/pass')).toString('base64');
     }
 
     createRequestOptions(method, id) {

@@ -2,8 +2,8 @@
 'use strict';
 const Bitbucket = require('../../APIs/bitbucket/bitbucket');
 const JIRA = require('../../APIs/jira/jira');
-const bitbucketClient = new Bitbucket('localhost', 7990, 'PROJECT_1', 'rep_1', 'admin', 'admin');
-const jiraClient = new JIRA('ensemble.atlassian.net', 443, 'FORTracker', 'F0RTr@cker@Google');
+const bitbucketClient = new Bitbucket('PROJECT_1', 'rep_1');
+const jiraClient = new JIRA();
 
 exports.register = function (server, options, next) {
 

@@ -1,6 +1,7 @@
 /*jshint esversion: 6, node: true*/
 'use strict';
 const Https = require('https');
+const Config = require('../../config');
 
 class jiraClient {
 
@@ -9,11 +10,13 @@ class jiraClient {
         return text.match(/HA-\d+/gi);
     }
 
-    constructor(serverUrl, serverPort, username, password) {
+    constructor() {
 
-        this.serverUrl = serverUrl;
-        this.serverPort = serverPort;
-        this.auth = 'Basic ' + new Buffer(username + ':' + password).toString('base64');
+        const jiraUser = Config.get('/jira/user');
+        const jiraPass = Config.get('/jira/pass');
+        this.serverUrl = Config.get('/jira/host');
+        this.serverPort = Config.get('/jira/port');
+        this.auth = 'Basic ' + new Buffer(jiraUser + ':' + jiraPass).toString('base64');
     }
 
     createRequestOptions(method, key) {
