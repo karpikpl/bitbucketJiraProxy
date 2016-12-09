@@ -1,0 +1,81 @@
+/*jshint esversion: 6, node: true*/
+'use strict';
+
+const Lab = require('lab');
+const Code = require('code');
+const Nock = require('nock');
+const Bitbucket = require('../../../APIs/bitbucket/bitbucket');
+const Config = require('../../../config');
+
+const lab = exports.lab = Lab.script();
+let bitbucketClient;
+let bitbucketMock;
+const prId = 25;
+const project = 'PROJECT_1';
+const repository = 'rep_1';
+const bitbucketData = {
+    id: prId,
+    'version': 23,
+    'title': 'FIX: Contract Start Date Error not disappearing when modifies:',
+    'description': '- contract start date to invalid\r\n - then clicks X button'
+};
+
+lab.beforeEach((done) => {
+
+    bitbucketClient = new Bitbucket(project, repository);
+    done();
+});
+
+lab.experiment('getPR should return pull request data', () => {
+
+    lab.test('it returns pull request data', (done) => {
+
+        // Arrange
+        bitbucketMock = Nock('http://' + Config.get('/bitbucket/host') + ':' + Config.get('/bitbucket/port'))
+            .get(`/bitbucket/rest/api/1.0/projects/${project}/repos/${repository}/pull-requests/${prId}`)
+            .basicAuth({
+                user: Config.get('/bitbucket/user'),
+                pass: Config.get('/bitbucket/pass')
+            })
+            .reply(200, bitbucketData)
+            .log(console.log);
+
+        // Act
+        bitbucketClient.getPR(prId, (err, data) => {
+
+            // Assert
+            Code.expect(err).to.be.null();
+            Code.expect(bitbucketMock.isDone()).to.be.true();
+            Code.expect(JSON.parse(data)).to.be.equal(bitbucketData);
+            done();
+        });
+    });
+
+    lab.test('updatePR should update title on the PR', (done) => {
+        // Arrange
+        const newTitle = 'new title';
+        const version = 99;
+        bitbucketMock = Nock('http://' + Config.get('/bitbucket/host') + ':' + Config.get('/bitbucket/port'), {
+            id: prId,
+            title: newTitle,
+            version
+        })
+            .put(`/bitbucket/rest/api/1.0/projects/${project}/repos/${repository}/pull-requests/${prId}`)
+            .basicAuth({
+                user: Config.get('/bitbucket/user'),
+                pass: Config.get('/bitbucket/pass')
+            })
+            .reply(200, bitbucketData)
+            .log(console.log);
+
+        // Act
+        bitbucketClient.updatePR(newTitle, prId, 99, (err, data) => {
+
+            // Assert
+            Code.expect(err).to.be.null();
+            Code.expect(bitbucketMock.isDone()).to.be.true();
+            Code.expect(JSON.parse(data)).to.be.equal(bitbucketData);
+            done();
+        });
+    });
+});

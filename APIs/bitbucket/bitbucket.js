@@ -7,11 +7,11 @@ class bitbucketClient {
 
     constructor(projectKey, repositorySlug) {
 
-        this.serverUrl = Config.get('/stash/host');
-        this.serverPort = Config.get('/stash/port');
+        this.serverUrl = Config.get('/bitbucket/host');
+        this.serverPort = Config.get('/bitbucket/port');
         this.projectKey = projectKey;
         this.repositorySlug = repositorySlug;
-        this.auth = 'Basic ' + new Buffer(Config.get('/stash/user') + ':' + Config.get('/stash/pass')).toString('base64');
+        this.auth = 'Basic ' + new Buffer(Config.get('/bitbucket/user') + ':' + Config.get('/bitbucket/pass')).toString('base64');
     }
 
     createRequestOptions(method, id) {
