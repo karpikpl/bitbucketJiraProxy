@@ -1,6 +1,6 @@
 /*jshint esversion: 6, node: true*/
 'use strict';
-const Http = require('http');
+const Https = require('https');
 const Config = require('../../config');
 
 class bitbucketClient {
@@ -19,7 +19,7 @@ class bitbucketClient {
         return {
             host: this.serverUrl,
             port: this.serverPort,
-            path: `/bitbucket/rest/api/1.0/projects/${this.projectKey}/repos/${this.repositorySlug}/pull-requests/${id}`,
+            path: `/rest/api/1.0/projects/${this.projectKey}/repos/${this.repositorySlug}/pull-requests/${id}`,
             method: method || 'GET',
             headers: {
                 Authorization: this.auth,
@@ -34,7 +34,7 @@ class bitbucketClient {
 
         console.log(`Trying to read PR from ${options.host}:${options.port}${options.path}`);
 
-        const req = Http.request(options, (res) => {
+        const req = Https.request(options, (res) => {
 
             // res.statusCode
             // res.headers
@@ -57,7 +57,7 @@ class bitbucketClient {
         // call to /rest/api/1.0/projects/{projectKey}/repos/{repositorySlug}/pull-requests/{pullRequestId}
         const options = this.createRequestOptions('PUT', id);
 
-        const req = Http.request(options, (res) => {
+        const req = Https.request(options, (res) => {
 
             res.setEncoding('utf8');
             res.on('data', (chunk) => {

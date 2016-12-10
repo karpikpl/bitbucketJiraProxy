@@ -2,8 +2,9 @@
 'use strict';
 const Bitbucket = require('../../APIs/bitbucket/bitbucket');
 const JIRA = require('../../APIs/jira/jira');
-const bitbucketClient = new Bitbucket('PROJECT_1', 'rep_1');
+const bitbucketClient = new Bitbucket('EN', 'harmony');
 const jiraClient = new JIRA();
+const Boom = require('boom');
 
 exports.register = function (server, options, next) {
 
@@ -24,17 +25,36 @@ exports.register = function (server, options, next) {
         handler: function (request, reply) {
 
             const id = request.query.PULL_REQUEST_ID;
-            const title = request.query.PULL_REQUEST_TITLE;
+            //const title = request.query.PULL_REQUEST_TITLE;
             const version = request.query.PULL_REQUEST_VERSION;
             const branch = request.query.PULL_REQUEST_FROM_BRANCH;
 
-            bitbucketClient.updatePR(title + ' updated!', id, version, (err, res) => {
+            // find Jira Key
+            const jiraKeys = JIRA.getJiraKeys(branch);
+
+            if (jiraKeys.length !== 1) {
+                return reply(Boom.badRequest(`Invalid branch name ${branch}`));
+            }
+
+            jiraClient.getJira(jiraKeys[0], (err, jiraData) => {
 
                 if (err) {
                     return console.error(err);
                 }
 
-                reply(res);
+                const jiraTitle = (jiraData.fields.parent && jiraData.fields.parent.fields.summary) || jiraData.fields.summary;
+                const jiraPriority = (jiraData.fields.parent && jiraData.fields.parent.fields.priority.id) || jiraData.fields.priority.id;
+
+                const newTitle = `[P${jiraPriority}] ${jiraTitle}`;
+
+                bitbucketClient.updatePR(newTitle, id, version, (err, res) => {
+
+                    if (err) {
+                        return console.error(err);
+                    }
+
+                    reply(res);
+                });
             });
         }
     });
@@ -46,8 +66,7 @@ exports.register = function (server, options, next) {
 
             const id = request.params.id;
 
-            console.log('GET TEST - attempting to get PR: ' + id);
-            bitbucketClient.getPR(5, (err, res) => {
+            bitbucketClient.getPR(id, (err, res) => {
 
                 if (err) {
                     return console.error(err);
@@ -65,7 +84,6 @@ exports.register = function (server, options, next) {
 
             const key = request.params.key;
 
-            console.log('GET TEST - attempting to get JIRA: ' + key);
             jiraClient.getJira(key, (err, res) => {
 
                 if (err) {
