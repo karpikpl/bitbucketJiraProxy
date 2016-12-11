@@ -5,22 +5,20 @@ const Config = require('../../config');
 
 class bitbucketClient {
 
-    constructor(projectKey, repositorySlug) {
+    constructor() {
 
         this.serverUrl = Config.get('/bitbucket/host');
         this.serverPort = Config.get('/bitbucket/port');
-        this.projectKey = projectKey;
-        this.repositorySlug = repositorySlug;
         this.auth = 'Basic ' + new Buffer(Config.get('/bitbucket/user') + ':' + Config.get('/bitbucket/pass')).toString('base64');
     }
 
-    createRequestOptions(method, id) {
+    createRequestOptions(method, id, project, repository) {
 
         return {
             host: this.serverUrl,
             port: this.serverPort,
-            path: `/rest/api/1.0/projects/${this.projectKey}/repos/${this.repositorySlug}/pull-requests/${id}`,
-            method: method || 'GET',
+            path: `/rest/api/1.0/projects/${project}/repos/${repository}/pull-requests/${id}`,
+            method: method,
             headers: {
                 Authorization: this.auth,
                 'Content-Type': 'application/json'
@@ -28,9 +26,9 @@ class bitbucketClient {
         };
     }
 
-    getPR(id, callback) {
+    getPR(id, project, repository, callback) {
 
-        const options = this.createRequestOptions('GET', id);
+        const options = this.createRequestOptions('GET', id, project, repository);
 
         console.log(`Trying to read PR from ${options.host}:${options.port}${options.path}`);
 
@@ -53,9 +51,9 @@ class bitbucketClient {
         req.end();
     }
 
-    updatePR(title, id, version, callback) {
+    updatePR(pr, callback) {
         // call to /rest/api/1.0/projects/{projectKey}/repos/{repositorySlug}/pull-requests/{pullRequestId}
-        const options = this.createRequestOptions('PUT', id);
+        const options = this.createRequestOptions('PUT', pr.id, pr.project, pr.repository);
 
         const req = Https.request(options, (res) => {
 
@@ -73,9 +71,9 @@ class bitbucketClient {
 
         // write data to request body
         req.write(JSON.stringify({
-            id,
-            title,
-            version
+            id: pr.id,
+            title: pr.title,
+            version: pr.version
         }));
         req.end();
     }

@@ -26,13 +26,13 @@ lab.beforeEach((done) => {
     done();
 });
 
-lab.experiment('getPR should return pull request data', () => {
+lab.experiment('bitbucket', () => {
 
-    lab.test('it returns pull request data', (done) => {
+    lab.test('getPr returns pull request data', (done) => {
 
         // Arrange
-        bitbucketMock = Nock('http://' + Config.get('/bitbucket/host') + ':' + Config.get('/bitbucket/port'))
-            .get(`/bitbucket/rest/api/1.0/projects/${project}/repos/${repository}/pull-requests/${prId}`)
+        bitbucketMock = Nock('https://' + Config.get('/bitbucket/host') + ':' + Config.get('/bitbucket/port'))
+            .get(`/rest/api/1.0/projects/${project}/repos/${repository}/pull-requests/${prId}`)
             .basicAuth({
                 user: Config.get('/bitbucket/user'),
                 pass: Config.get('/bitbucket/pass')
@@ -41,7 +41,7 @@ lab.experiment('getPR should return pull request data', () => {
             .log(console.log);
 
         // Act
-        bitbucketClient.getPR(prId, (err, data) => {
+        bitbucketClient.getPR(prId, project, repository, (err, data) => {
 
             // Assert
             Code.expect(err).to.be.null();
@@ -55,12 +55,12 @@ lab.experiment('getPR should return pull request data', () => {
         // Arrange
         const newTitle = 'new title';
         const version = 99;
-        bitbucketMock = Nock('http://' + Config.get('/bitbucket/host') + ':' + Config.get('/bitbucket/port'), {
+        bitbucketMock = Nock('https://' + Config.get('/bitbucket/host') + ':' + Config.get('/bitbucket/port'), {
             id: prId,
             title: newTitle,
             version
         })
-            .put(`/bitbucket/rest/api/1.0/projects/${project}/repos/${repository}/pull-requests/${prId}`)
+            .put(`/rest/api/1.0/projects/${project}/repos/${repository}/pull-requests/${prId}`)
             .basicAuth({
                 user: Config.get('/bitbucket/user'),
                 pass: Config.get('/bitbucket/pass')
@@ -69,7 +69,13 @@ lab.experiment('getPR should return pull request data', () => {
             .log(console.log);
 
         // Act
-        bitbucketClient.updatePR(newTitle, prId, 99, (err, data) => {
+        bitbucketClient.updatePR({
+            id: prId,
+            version,
+            project,
+            repository,
+            title: newTitle
+        }, (err, data) => {
 
             // Assert
             Code.expect(err).to.be.null();
