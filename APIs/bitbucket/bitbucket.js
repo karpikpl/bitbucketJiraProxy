@@ -18,7 +18,7 @@ class bitbucketClient {
             host: this.serverUrl,
             port: this.serverPort,
             path: `/rest/api/1.0/projects/${project}/repos/${repository}/pull-requests/${id}`,
-            method: method,
+            method,
             headers: {
                 Authorization: this.auth,
                 'Content-Type': 'application/json'

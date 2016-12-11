@@ -26,7 +26,7 @@ class jiraClient {
             host: this.serverUrl,
             port: this.serverPort,
             path: `/rest/api/2/issue/${key}?fields=summary,created,status,aggregateprogress,priority,issuetype,customfield_11500,customfield_11700,customfield_10008`,
-            method: method,
+            method,
             headers: {
                 Authorization: this.auth,
                 'Content-Type': 'application/json'
