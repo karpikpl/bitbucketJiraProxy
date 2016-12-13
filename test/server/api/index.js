@@ -3,11 +3,10 @@
 
 const Lab = require('lab');
 const Code = require('code');
-const Config = require('../../../config');
+const Config = require('../../test-config');
 const Hapi = require('hapi');
 const IndexPlugin = require('../../../server/api/index');
 const Nock = require('nock');
-
 
 const lab = exports.lab = Lab.script();
 let request;
@@ -30,7 +29,6 @@ lab.beforeEach((done) => {
         done();
     });
 });
-
 
 lab.experiment('Index Plugin', () => {
 

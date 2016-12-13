@@ -58,13 +58,10 @@ exports.register = function (server, options, next) {
                     title: newTitle
                 }, (err, res) => {
 
-                    console.log('Response from bitbucket');
-                    console.log(res);
                     if (err) {
                         return console.error(err);
                     }
 
-                    console.log('Returning response res...');
                     reply(res);
                 });
             });

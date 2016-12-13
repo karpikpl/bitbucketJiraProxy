@@ -1,11 +1,16 @@
 /*jshint esversion: 6, node: true*/
 'use strict';
 
+const Proxyquire = require('proxyquire');
 const Lab = require('lab');
 const Code = require('code');
 const Nock = require('nock');
-const Bitbucket = require('../../../APIs/bitbucket/bitbucket');
-const Config = require('../../../config');
+const Config = require('../../test-config');
+const Bitbucket = Proxyquire('../../../APIs/bitbucket/bitbucket', {
+    '../../config': {
+        get: (key) => Config.get(key)
+    }
+});
 
 const lab = exports.lab = Lab.script();
 let bitbucketClient;
