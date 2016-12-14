@@ -34,49 +34,31 @@ const config = {
     }
 };
 
-const loadConfig = function (callback) {
+const loadConfigSync = () => {
 
     let pathToConfig = process.argv[2] || process.env.CONFIG;
 
     if (pathToConfig) {
-
         // make absolute
         pathToConfig = Path.join(__dirname, pathToConfig);
 
-        FS.readFile(pathToConfig, 'utf8', (err, data) => {
-
-            if (err) {
-                callback(err);
-                return console.error(`Error loading configuration from "${pathToConfig}" defaulting to config.js`);
-            }
-
-            try {
-                console.log(`Loading configuration from ${pathToConfig}`);
-                const parsed = JSON.parse(data);
-                return callback(null, new Confidence.Store(parsed));
-            }
-            catch (err2) {
-                callback(err2);
-                return console.error(`Error loading configuration from "${pathToConfig}" defaulting to config.js`);
-            }
-        });
+        try {
+            const data = FS.readFileSync(pathToConfig, 'utf8');
+            console.log(`Loading configuration from ${pathToConfig}`);
+            const parsed = JSON.parse(data);
+            return new Confidence.Store(parsed);
+        }
+        catch (err) {
+            console.error(`Error loading configuration from "${pathToConfig}" defaulting to config.js`);
+        }
     }
 
-    return callback(null, new Confidence.Store(config));
+    return new Confidence.Store(config);
 };
 
-let store;
+const store = loadConfigSync();
 
-loadConfig((err, data) => {
-
-    if (err) {
-        return console.error(err);
-    }
-
-    console.log(`Using jira: ${data.get('/jira/host')}\nUsing bitbucket: ${data.get('/bitbucket/host')}`);
-    store = data;
-});
-
+console.log(`Using jira: ${store.get('/jira/host')}\nUsing bitbucket: ${store.get('/bitbucket/host')}`);
 
 exports.get = function (key) {
 
