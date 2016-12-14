@@ -36,23 +36,25 @@ const config = {
 
 const loadConfig = function (callback) {
 
-    if (process.argv[2]) {
+    const configSetting = process.argv[2] || process.env.CONFIG;
 
-        FS.readFile(process.argv[2], 'utf8', (err, data) => {
+    if (configSetting) {
+
+        FS.readFile(configSetting, 'utf8', (err, data) => {
 
             if (err) {
                 callback(err);
-                return console.error(`Error loading configuration from "${process.argv[2]}" defaulting to config.js`);
+                return console.error(`Error loading configuration from "${configSetting}" defaulting to config.js`);
             }
 
             try {
-                console.log(`Loading configuration from ${process.argv[2]}`);
+                console.log(`Loading configuration from ${configSetting}`);
                 const parsed = JSON.parse(data);
                 return callback(null, new Confidence.Store(parsed));
             }
             catch (err2) {
                 callback(err2);
-                return console.error(`Error loading configuration from "${process.argv[2]}" defaulting to config.js`);
+                return console.error(`Error loading configuration from "${configSetting}" defaulting to config.js`);
             }
         });
     }
