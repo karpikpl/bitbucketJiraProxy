@@ -36,7 +36,7 @@ lab.experiment('Index Plugin', () => {
 
         request = {
             method: 'GET',
-            url: '/'
+            url: '/bjproxy'
         };
 
         done();
@@ -90,7 +90,7 @@ lab.experiment('Stash Notification', () => {
 
         request = {
             method: 'GET',
-            url: `/notification?PULL_REQUEST_ID=${prId}&PULL_REQUEST_VERSION=${version}&PULL_REQUEST_FROM_BRANCH=refs/heads/bugfix/${key}-styling-for-accordion-for-related2&PULL_REQUEST_FROM_REPO_PROJECT_KEY=${project}&PULL_REQUEST_FROM_REPO_SLUG=${repository}`
+            url: `/bjproxy/notification?PULL_REQUEST_ID=${prId}&PULL_REQUEST_VERSION=${version}&PULL_REQUEST_FROM_BRANCH=refs/heads/bugfix/${key}-styling-for-accordion-for-related2&PULL_REQUEST_FROM_REPO_PROJECT_KEY=${project}&PULL_REQUEST_FROM_REPO_SLUG=${repository}`
         };
 
         jiraMock = Nock('https://' + Config.get('/jira/host') + ':' + Config.get('/jira/port'))

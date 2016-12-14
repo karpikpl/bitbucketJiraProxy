@@ -11,7 +11,7 @@ exports.register = function (server, options, next) {
 
     server.route({
         method: 'GET',
-        path: '/',
+        path: '/bjproxy',
         handler: function (request, reply) {
 
             reply({
@@ -22,7 +22,7 @@ exports.register = function (server, options, next) {
 
     server.route({
         method: 'GET',
-        path: '/notification',
+        path: '/bjproxy/notification',
         handler: function (request, reply) {
 
             const id = request.query.PULL_REQUEST_ID;
@@ -71,7 +71,7 @@ exports.register = function (server, options, next) {
 
     server.route({
         method: 'GET',
-        path: '/pullRequest/{id}',
+        path: '/bjproxy/pullRequest/{id}',
         handler: function (request, reply) {
 
             const id = request.params.id;
@@ -97,7 +97,7 @@ exports.register = function (server, options, next) {
 
     server.route({
         method: 'GET',
-        path: '/jira/{key}',
+        path: '/bjproxy/jira/{key}',
         handler: function (request, reply) {
 
             const key = request.params.key;
