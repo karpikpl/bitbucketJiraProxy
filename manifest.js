@@ -35,7 +35,7 @@ const manifest = {
                 register: 'visionary',
                 options: {
                     engines: { jade: 'jade' },
-                    path: './server/web'
+                    path: __dirname + '/server/web'
                 }
             }
         },

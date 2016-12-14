@@ -3,7 +3,7 @@
 
 const Confidence = require('confidence');
 const FS = require('fs');
-
+const Path = require('path');
 
 const criteria = {
     env: process.env.NODE_ENV
@@ -36,25 +36,28 @@ const config = {
 
 const loadConfig = function (callback) {
 
-    const configSetting = process.argv[2] || process.env.CONFIG;
+    let pathToConfig = process.argv[2] || process.env.CONFIG;
 
-    if (configSetting) {
+    if (pathToConfig) {
 
-        FS.readFile(configSetting, 'utf8', (err, data) => {
+        // make absolute
+        pathToConfig = Path.join(__dirname, pathToConfig);
+
+        FS.readFile(pathToConfig, 'utf8', (err, data) => {
 
             if (err) {
                 callback(err);
-                return console.error(`Error loading configuration from "${configSetting}" defaulting to config.js`);
+                return console.error(`Error loading configuration from "${pathToConfig}" defaulting to config.js`);
             }
 
             try {
-                console.log(`Loading configuration from ${configSetting}`);
+                console.log(`Loading configuration from ${pathToConfig}`);
                 const parsed = JSON.parse(data);
                 return callback(null, new Confidence.Store(parsed));
             }
             catch (err2) {
                 callback(err2);
-                return console.error(`Error loading configuration from "${configSetting}" defaulting to config.js`);
+                return console.error(`Error loading configuration from "${pathToConfig}" defaulting to config.js`);
             }
         });
     }
