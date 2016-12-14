@@ -5,6 +5,7 @@ const JIRA = require('../../APIs/jira/jira');
 const bitbucketClient = new Bitbucket();
 const jiraClient = new JIRA();
 const Boom = require('boom');
+const Config = require('../../config');
 
 exports.register = function (server, options, next) {
 
@@ -14,7 +15,7 @@ exports.register = function (server, options, next) {
         handler: function (request, reply) {
 
             reply({
-                message: 'welcome to the Stash & JIRA proxy'
+                message: `welcome to the Stash & JIRA proxy\nJira: ${Config.get('/jira/host')}\nBitbucket: ${Config.get('/bitbucket/host')}`
             });
         }
     });
@@ -76,6 +77,12 @@ exports.register = function (server, options, next) {
             const id = request.params.id;
             const project = request.query.project || 'EN';
             const repository = request.query.repository || 'harmony';
+            const apiKey = request.query.apiKey || request.headers.apikey;
+
+
+            if (Config.get('/apiKey') && apiKey !== Config.get('/apiKey')) {
+                return reply(Boom.unauthorized('Invalid apiKey'));
+            }
 
             bitbucketClient.getPR(id, project, repository, (err, res) => {
 
@@ -94,6 +101,13 @@ exports.register = function (server, options, next) {
         handler: function (request, reply) {
 
             const key = request.params.key;
+            const apiKey = request.query.apiKey || request.headers.apikey;
+
+            console.log(request.headers);
+
+            if (Config.get('/apiKey') && apiKey !== Config.get('/apiKey')) {
+                return reply(Boom.unauthorized('Invalid apiKey'));
+            }
 
             jiraClient.getJira(key, (err, res) => {
 
