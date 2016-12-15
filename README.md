@@ -6,13 +6,19 @@ It gets notification from Stash (Bitbucket Server), parses it for Jira id, gets 
 
 ## Usage
 
-This requires https://github.com/tomasbjerre/pull-request-notifier-for-bitbucket
+This requires https://github.com/tomasbjerre/pull-request-notifier-for-bitbucket to be configured with:
+* PULL_REQUEST_ID
+* PULL_REQUEST_VERSION
+* PULL_REQUEST_FROM_BRANCH
+* PULL_REQUEST_FROM_REPO_PROJECT_KEY
+* PULL_REQUEST_FROM_REPO_SLUG
 
-
-```bash
-$ echo "details coming soon"
+and point to this proxy
+```
+/bjproxy/notification
 ```
 
+this will trigger a call to JIRA configured in `config.js` followed by a call to bitbucket server (also defined in `config.js`) which updates the PR title using `[P${jiraPriority}] ${jiraKeys[0]} ${jiraTitle}` pattern.
 
 ## License
 
