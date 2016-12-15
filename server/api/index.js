@@ -49,7 +49,7 @@ exports.register = function (server, options, next) {
                 const jiraTitle = (jiraData.fields.parent && jiraData.fields.parent.fields.summary) || jiraData.fields.summary;
                 const jiraPriority = (jiraData.fields.parent && jiraData.fields.parent.fields.priority.id) || jiraData.fields.priority.id;
 
-                const newTitle = `[P${jiraPriority}] ${jiraTitle}`;
+                const newTitle = `[P${jiraPriority}] ${jiraKeys[0]} ${jiraTitle}`;
 
                 bitbucketClient.updatePR({
                     id,
