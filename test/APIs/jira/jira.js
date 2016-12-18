@@ -65,7 +65,7 @@ lab.experiment('getJira should return jira data using basic auth', () => {
             // Assert
             Code.expect(err).to.be.null();
             Code.expect(jiraMock.isDone()).to.be.true();
-            Code.expect(data).to.be.equal(jiraData);
+            Code.expect(data).to.be.equal({ data: jiraData, statusCode: 200 });
             done();
         });
     });
