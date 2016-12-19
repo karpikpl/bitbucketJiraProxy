@@ -1,7 +1,7 @@
 /*jshint esversion: 6, node: true*/
 'use strict';
-const Https = require('https');
 const Config = require('../../config');
+const Https = (Config.get('/bitbucket/https') || Config.get('/bitbucket/port') === 443) ? require('https') : require('http');
 
 class bitbucketClient {
 
@@ -17,7 +17,7 @@ class bitbucketClient {
         return {
             host: this.serverUrl,
             port: this.serverPort,
-            path: `/rest/api/1.0/projects/${project}/repos/${repository}/pull-requests/${id}`,
+            path: `${Config.get('/bitbucket/path') || ''}/rest/api/1.0/projects/${project}/repos/${repository}/pull-requests/${id}`,
             method,
             headers: {
                 Authorization: this.auth,
@@ -39,7 +39,7 @@ class bitbucketClient {
             res.setEncoding('utf8');
             res.on('data', (chunk) => {
 
-                callback(null, chunk);
+                callback(null, { data:JSON.parse(chunk), statusCode: res.statusCode });
             });
         });
 
@@ -53,6 +53,7 @@ class bitbucketClient {
 
     updatePR(pr, callback) {
         // call to /rest/api/1.0/projects/{projectKey}/repos/{repositorySlug}/pull-requests/{pullRequestId}
+        // https://developer.atlassian.com/static/rest/bitbucket-server/4.12.0/bitbucket-rest.html#idp2309600
         const options = this.createRequestOptions('PUT', pr.id, pr.project, pr.repository);
 
         const req = Https.request(options, (res) => {
@@ -60,7 +61,7 @@ class bitbucketClient {
             res.setEncoding('utf8');
             res.on('data', (chunk) => {
 
-                callback(null, chunk);
+                callback(null, { data: JSON.parse(chunk), statusCode: res.statusCode });
             });
         });
 
@@ -69,12 +70,16 @@ class bitbucketClient {
             callback(e);
         });
 
-        // write data to request body
-        req.write(JSON.stringify({
+        const requestBody = JSON.stringify({
             id: pr.id,
             title: pr.title,
-            version: pr.version
-        }));
+            version: pr.version,
+            reviewers: pr.reviewers
+        });
+        console.log('Bitbucker request: ' + requestBody);
+
+        // write data to request body
+        req.write(requestBody);
         req.end();
     }
 }
