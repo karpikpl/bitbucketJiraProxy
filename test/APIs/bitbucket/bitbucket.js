@@ -51,7 +51,7 @@ lab.experiment('bitbucket', () => {
             // Assert
             Code.expect(err).to.be.null();
             Code.expect(bitbucketMock.isDone()).to.be.true();
-            Code.expect(data).to.be.equal({ data: bitbucketData, statusCode: 200 });
+            Code.expect(JSON.parse(data)).to.be.equal(bitbucketData);
             done();
         });
     });
@@ -85,7 +85,7 @@ lab.experiment('bitbucket', () => {
             // Assert
             Code.expect(err).to.be.null();
             Code.expect(bitbucketMock.isDone()).to.be.true();
-            Code.expect(data).to.be.equal({ data: bitbucketData, statusCode: 200 });
+            Code.expect(JSON.parse(data)).to.be.equal(bitbucketData);
             done();
         });
     });

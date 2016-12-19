@@ -1,4 +1,3 @@
 node_modules
 test/artifacts/*
 configSecret.json
-configLocal.json

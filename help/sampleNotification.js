@@ -24,11 +24,11 @@
   //       PULL_REQUEST_MERGE_COMMIT: '',
   //       PULL_REQUEST_PARTICIPANTS_APPROVED_COUNT: '0',
   //       PULL_REQUEST_PARTICIPANTS_EMAIL: '',
-  //       PULL_REQUEST_REVIEWERS: 'Reviewer John,User'
-  //       PULL_REQUEST_REVIEWERS_APPROVED_COUNT: 0
-  //       PULL_REQUEST_REVIEWERS_EMAIL: 'john@reviewer.com,user@example.com'
-  //       PULL_REQUEST_REVIEWERS_ID: '2,52'
-  //       PULL_REQUEST_REVIEWERS_SLUG: 'reviewer1,user'
+  //       PULL_REQUEST_REVIEWERS: '',
+  //       PULL_REQUEST_REVIEWERS_APPROVED_COUNT: '0',
+  //       PULL_REQUEST_REVIEWERS_EMAIL: '',
+  //       PULL_REQUEST_REVIEWERS_ID: '',
+  //       PULL_REQUEST_REVIEWERS_SLUG: '',
   //       PULL_REQUEST_STATE: 'OPEN',
   //       PULL_REQUEST_TITLE: 'Branch mod merge',
   //       PULL_REQUEST_TO_BRANCH: 'out_of_order_branch',

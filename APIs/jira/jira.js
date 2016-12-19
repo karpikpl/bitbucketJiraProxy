@@ -47,7 +47,7 @@ class jiraClient {
             res.setEncoding('utf8');
             res.on('data', (chunk) => {
 
-                callback(null, { data: JSON.parse(chunk), statusCode: res.statusCode });
+                callback(null, JSON.parse(chunk));
             });
         });
 

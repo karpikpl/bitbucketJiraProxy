@@ -31,27 +31,11 @@ exports.register = function (server, options, next) {
             const branch = request.query.PULL_REQUEST_FROM_BRANCH;
             const project = request.query.PULL_REQUEST_FROM_REPO_PROJECT_KEY;
             const repository = request.query.PULL_REQUEST_FROM_REPO_SLUG;
-            const reviewersSlugs = request.query.PULL_REQUEST_REVIEWERS_SLUG;
-
-            if (!id || !version || !branch || !project || !repository || !reviewersSlugs) {
-                return reply(Boom.badRequest('Not all required parameters provided. Check documentation for API description'));
-            }
-
-            const reviewers = reviewersSlugs
-                .split(',')
-                .map((name) => {
-
-                    return {
-                        user: {
-                            name
-                        }
-                    };
-                });
 
             // find Jira Key
             const jiraKeys = JIRA.getJiraKeys(branch);
 
-            if (!jiraKeys || jiraKeys.length !== 1) {
+            if (jiraKeys.length !== 1) {
                 return reply(Boom.badRequest(`Invalid branch name ${branch}`));
             }
 
@@ -59,12 +43,11 @@ exports.register = function (server, options, next) {
             jiraClient.getJira(jiraKeys[0], (err, jiraData) => {
 
                 if (err) {
-                    console.error(err);
-                    return reply(Boom.badRequest(`Could not get jira ${jiraKeys[0]}`));
+                    return console.error(err);
                 }
 
-                const jiraTitle = (jiraData.data.fields.parent && jiraData.data.fields.parent.fields.summary) || jiraData.data.fields.summary;
-                const jiraPriority = (jiraData.data.fields.parent && jiraData.data.fields.parent.fields.priority.id) || jiraData.data.fields.priority.id;
+                const jiraTitle = (jiraData.fields.parent && jiraData.fields.parent.fields.summary) || jiraData.fields.summary;
+                const jiraPriority = (jiraData.fields.parent && jiraData.fields.parent.fields.priority.id) || jiraData.fields.priority.id;
 
                 const newTitle = `[P${jiraPriority}] ${jiraKeys[0]} ${jiraTitle}`;
 
@@ -73,16 +56,14 @@ exports.register = function (server, options, next) {
                     version,
                     project,
                     repository,
-                    title: newTitle,
-                    reviewers
+                    title: newTitle
                 }, (err, res) => {
 
                     if (err) {
-                        console.error(err);
-                        return reply(Boom.badRequest(`Could update PR ${id}`));
+                        return console.error(err);
                     }
 
-                    reply(res).code(res.statusCode);
+                    reply(res);
                 });
             });
         }
@@ -106,11 +87,10 @@ exports.register = function (server, options, next) {
             bitbucketClient.getPR(id, project, repository, (err, res) => {
 
                 if (err) {
-                    console.error(err);
-                    return reply(Boom.badRequest(`Could get PR ${id}`));
+                    return console.error(err);
                 }
 
-                reply(res).code(res.statusCode);
+                reply(res);
             });
         }
     });
@@ -132,11 +112,10 @@ exports.register = function (server, options, next) {
             jiraClient.getJira(key, (err, res) => {
 
                 if (err) {
-                    console.error(err);
-                    return reply(Boom.badRequest(`Could get JIRA ${key}`));
+                    return console.error(err);
                 }
 
-                reply(res).code(res.statusCode);
+                reply(res);
             });
         }
     });

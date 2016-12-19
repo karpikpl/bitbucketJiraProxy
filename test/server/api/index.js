@@ -64,7 +64,6 @@ lab.experiment('Stash Notification', () => {
     const prId = 502;
     const version = 99;
     const key = 'HA-8714';
-    const reviewers = 'reviewer1,user';
     const jiraData = {
         key,
         'fields': {
@@ -84,23 +83,14 @@ lab.experiment('Stash Notification', () => {
         id: prId,
         'version': version + 1,
         'title': newPrTitle,
-        'description': '- contract start date to invalid\r\n - then clicks X button',
-        'reviewers': [{
-            'user': {
-                'name': 'reviewer1'
-            }
-        }, {
-            'user': {
-                'name': 'user'
-            }
-        }]
+        'description': '- contract start date to invalid\r\n - then clicks X button'
     };
 
     lab.beforeEach((done) => {
 
         request = {
             method: 'GET',
-            url: `/bjproxy/notification?PULL_REQUEST_ID=${prId}&PULL_REQUEST_VERSION=${version}&PULL_REQUEST_FROM_BRANCH=refs/heads/bugfix/${key}-styling-for-accordion-for-related2&PULL_REQUEST_FROM_REPO_PROJECT_KEY=${project}&PULL_REQUEST_FROM_REPO_SLUG=${repository}&PULL_REQUEST_REVIEWERS_SLUG=${reviewers}`
+            url: `/bjproxy/notification?PULL_REQUEST_ID=${prId}&PULL_REQUEST_VERSION=${version}&PULL_REQUEST_FROM_BRANCH=refs/heads/bugfix/${key}-styling-for-accordion-for-related2&PULL_REQUEST_FROM_REPO_PROJECT_KEY=${project}&PULL_REQUEST_FROM_REPO_SLUG=${repository}`
         };
 
         jiraMock = Nock('https://' + Config.get('/jira/host') + ':' + Config.get('/jira/port'))
@@ -136,7 +126,7 @@ lab.experiment('Stash Notification', () => {
             Code.expect(jiraMock.isDone()).to.be.true();
             Code.expect(bitbucketMock.isDone()).to.be.true();
             Code.expect(response.statusCode).to.equal(200);
-            Code.expect(response.result).to.equal({ data: bitbucketData, statusCode: 200 });
+            Code.expect(JSON.parse(response.result)).to.equal(bitbucketData);
 
             done();
         });
