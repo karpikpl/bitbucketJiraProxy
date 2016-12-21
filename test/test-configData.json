@@ -1,0 +1,25 @@
+{
+    "$meta": "This file contains configuration for testing",
+    "projectName": "stashJiraproxyTest",
+    "port": {
+        "web": {
+            "$filter": "env",
+            "test": 1,
+            "$default": 2
+        }
+    },
+    "bitbucket": {
+        "user": "test.bitbucket.user",
+        "pass": "test.bitbucket.pass",
+        "host": "test.bitbucket.host",
+        "port": 7,
+        "https": false,
+        "path": "test.bitbucket.path"
+    },
+    "jira": {
+        "user": "test.jira.user",
+        "pass": "test.jira.pass",
+        "host": "test.jira.host",
+        "port": 8
+    }
+}

@@ -136,7 +136,119 @@ lab.experiment('Stash Notification', () => {
             Code.expect(jiraMock.isDone()).to.be.true();
             Code.expect(bitbucketMock.isDone()).to.be.true();
             Code.expect(response.statusCode).to.equal(200);
-            Code.expect(response.result).to.equal({ data: bitbucketData, statusCode: 200 });
+            Code.expect(response.result).to.equal({
+                data: bitbucketData,
+                statusCode: 200
+            });
+
+            done();
+        });
+    });
+
+    lab.test('it updates PR with Jira title when no reviewers', (done) => {
+
+        request.url = `/bjproxy/notification?PULL_REQUEST_ID=${prId}&PULL_REQUEST_VERSION=${version}&PULL_REQUEST_FROM_BRANCH=refs/heads/bugfix/${key}-styling-for-accordion-for-related2&PULL_REQUEST_FROM_REPO_PROJECT_KEY=${project}&PULL_REQUEST_FROM_REPO_SLUG=${repository}&PULL_REQUEST_REVIEWERS_SLUG=${''}`;
+
+        server.inject(request, (response) => {
+
+            Code.expect(jiraMock.isDone()).to.be.true();
+            Code.expect(bitbucketMock.isDone()).to.be.true();
+            Code.expect(response.statusCode).to.equal(200);
+            Code.expect(response.result).to.equal({
+                data: bitbucketData,
+                statusCode: 200
+            });
+
+            done();
+        });
+    });
+
+    [{
+        case: 'no id',
+        url: `/bjproxy/notification?PULL_REQUEST_VERSION=${version}&PULL_REQUEST_FROM_BRANCH=refs/heads/bugfix/${key}-styling-for-accordion-for-related2&PULL_REQUEST_FROM_REPO_PROJECT_KEY=${project}&PULL_REQUEST_FROM_REPO_SLUG=${repository}&PULL_REQUEST_REVIEWERS_SLUG=${reviewers}`
+    }, {
+        case: 'no version',
+        url: `/bjproxy/notification?PULL_REQUEST_ID=${prId}&PULL_REQUEST_FROM_BRANCH=refs/heads/bugfix/${key}-styling-for-accordion-for-related2&PULL_REQUEST_FROM_REPO_PROJECT_KEY=${project}&PULL_REQUEST_FROM_REPO_SLUG=${repository}&PULL_REQUEST_REVIEWERS_SLUG=${reviewers}`
+    }, {
+        case: 'no branch',
+        url: `/bjproxy/notification?PULL_REQUEST_ID=${prId}&PULL_REQUEST_VERSION=${version}&PULL_REQUEST_FROM_REPO_PROJECT_KEY=${project}&PULL_REQUEST_FROM_REPO_SLUG=${repository}&PULL_REQUEST_REVIEWERS_SLUG=${reviewers}`
+    }, {
+        case: 'no project',
+        url: `/bjproxy/notification?PULL_REQUEST_ID=${prId}&PULL_REQUEST_VERSION=${version}&PULL_REQUEST_FROM_BRANCH=refs/heads/bugfix/${key}-styling-for-accordion-for-related2&PULL_REQUEST_FROM_REPO_SLUG=${repository}&PULL_REQUEST_REVIEWERS_SLUG=${reviewers}`
+    }, {
+        case: 'no repo',
+        url: `/bjproxy/notification?PULL_REQUEST_ID=${prId}&PULL_REQUEST_VERSION=${version}&PULL_REQUEST_FROM_BRANCH=refs/heads/bugfix/${key}-styling-for-accordion-for-related2&PULL_REQUEST_FROM_REPO_PROJECT_KEY=${project}&PULL_REQUEST_REVIEWERS_SLUG=${reviewers}`
+    }, {
+        case: 'no reviewers',
+        url: `/bjproxy/notification?PULL_REQUEST_ID=${prId}&PULL_REQUEST_VERSION=${version}&PULL_REQUEST_FROM_BRANCH=refs/heads/bugfix/${key}-styling-for-accordion-for-related2&PULL_REQUEST_FROM_REPO_PROJECT_KEY=${project}&PULL_REQUEST_FROM_REPO_SLUG=${repository}`
+    }].forEach((testCase) => {
+
+        lab.test(`it returns 400 (Bad Request) when PR data incomplete URL: ${testCase.case}`, (done) => {
+
+            request.url = testCase.url;
+
+            server.inject(request, (response) => {
+
+                Code.expect(jiraMock.isDone()).to.be.false();
+                Code.expect(bitbucketMock.isDone()).to.be.false();
+                Code.expect(response.statusCode).to.equal(400);
+
+                done();
+            });
+        });
+    });
+
+
+    [{
+        code: 500,
+        data: {
+            msg: 'error'
+        }
+    }, {
+        code: 500,
+        data: {}
+    }].forEach((testCase) => {
+
+        lab.test('it returns 400 (Bad Request) when Jira could not be found', (done) => {
+
+            request.url = `/bjproxy/notification?PULL_REQUEST_ID=${prId}&PULL_REQUEST_VERSION=${version}&PULL_REQUEST_FROM_BRANCH=refs/heads/bugfix/${'HA-1'}-styling-for-accordion-for-related2&PULL_REQUEST_FROM_REPO_PROJECT_KEY=${project}&PULL_REQUEST_FROM_REPO_SLUG=${repository}&PULL_REQUEST_REVIEWERS_SLUG=${reviewers}`;
+            jiraMock = Nock('https://' + Config.get('/jira/host') + ':' + Config.get('/jira/port'))
+                .get(`/rest/api/2/issue/${'HA-1'}?fields=summary,created,status,aggregateprogress,priority,issuetype,customfield_11500,customfield_11700,customfield_10008`)
+                .basicAuth({
+                    user: Config.get('/jira/user'),
+                    pass: Config.get('/jira/pass')
+                })
+                .reply(testCase.code, testCase.data)
+                .log(console.log);
+
+            server.inject(request, (response) => {
+
+                Code.expect(jiraMock.isDone()).to.be.true();
+                Code.expect(bitbucketMock.isDone()).to.be.false();
+                Code.expect(response.statusCode).to.equal(400);
+
+                done();
+            });
+        });
+    });
+
+    lab.test('it returns 400 (Bad Request) when Jira server responds with error', (done) => {
+
+        request.url = `/bjproxy/notification?PULL_REQUEST_ID=${prId}&PULL_REQUEST_VERSION=${version}&PULL_REQUEST_FROM_BRANCH=refs/heads/bugfix/${'HA-1'}-styling-for-accordion-for-related2&PULL_REQUEST_FROM_REPO_PROJECT_KEY=${project}&PULL_REQUEST_FROM_REPO_SLUG=${repository}&PULL_REQUEST_REVIEWERS_SLUG=${reviewers}`;
+        jiraMock = Nock('https://' + Config.get('/jira/host') + ':' + Config.get('/jira/port'))
+            .get(`/rest/api/2/issue/${'HA-1'}?fields=summary,created,status,aggregateprogress,priority,issuetype,customfield_11500,customfield_11700,customfield_10008`)
+            .basicAuth({
+                user: Config.get('/jira/user'),
+                pass: Config.get('/jira/pass')
+            })
+            .replyWithError('something awful happened')
+            .log(console.log);
+
+        server.inject(request, (response) => {
+
+            Code.expect(jiraMock.isDone()).to.be.true();
+            Code.expect(bitbucketMock.isDone()).to.be.false();
+            Code.expect(response.statusCode).to.equal(400);
 
             done();
         });

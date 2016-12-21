@@ -33,7 +33,7 @@ exports.register = function (server, options, next) {
             const repository = request.query.PULL_REQUEST_FROM_REPO_SLUG;
             const reviewersSlugs = request.query.PULL_REQUEST_REVIEWERS_SLUG;
 
-            if (!id || !version || !branch || !project || !repository || !reviewersSlugs) {
+            if (!id || !version || !branch || !project || !repository || reviewersSlugs === undefined) {
                 return reply(Boom.badRequest('Not all required parameters provided. Check documentation for API description'));
             }
 
@@ -58,7 +58,7 @@ exports.register = function (server, options, next) {
             console.log('Getting JIRA data for ' + jiraKeys[0]);
             jiraClient.getJira(jiraKeys[0], (err, jiraData) => {
 
-                if (err) {
+                if (err || !jiraData || jiraData.statusCode !== 200) {
                     console.error(err);
                     return reply(Boom.badRequest(`Could not get jira ${jiraKeys[0]}`));
                 }

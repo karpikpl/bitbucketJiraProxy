@@ -70,3 +70,5 @@ exports.meta = function (key) {
 
     return store.meta(key, criteria);
 };
+
+exports.loadConfigSync = loadConfigSync;
