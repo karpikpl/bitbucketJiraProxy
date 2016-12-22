@@ -37,7 +37,7 @@ exports.register = function (server, options, next) {
                 return reply(Boom.badRequest('Not all required parameters provided. Check documentation for API description'));
             }
 
-            const reviewers = reviewersSlugs
+            const reviewers = reviewersSlugs && reviewersSlugs
                 .split(',')
                 .map((name) => {
 
@@ -68,14 +68,19 @@ exports.register = function (server, options, next) {
 
                 const newTitle = `[P${jiraPriority}] ${jiraKeys[0]} ${jiraTitle}`;
 
-                bitbucketClient.updatePR({
+                const newPrData = {
                     id,
                     version,
                     project,
                     repository,
-                    title: newTitle,
-                    reviewers
-                }, (err, res) => {
+                    title: newTitle
+                };
+
+                if (reviewers) {
+                    newPrData.reviewers = reviewers;
+                }
+
+                bitbucketClient.updatePR(newPrData, (err, res) => {
 
                     if (err) {
                         console.error(err);
@@ -110,7 +115,7 @@ exports.register = function (server, options, next) {
                     return reply(Boom.badRequest(`Could get PR ${id}`));
                 }
 
-                reply(res).code(res.statusCode);
+                reply(res.data).code(res.statusCode);
             });
         }
     });
@@ -136,7 +141,7 @@ exports.register = function (server, options, next) {
                     return reply(Boom.badRequest(`Could get JIRA ${key}`));
                 }
 
-                reply(res).code(res.statusCode);
+                reply(res.data).code(res.statusCode);
             });
         }
     });

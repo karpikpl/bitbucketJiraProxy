@@ -59,6 +59,7 @@ lab.experiment('Stash Notification', () => {
 
     let jiraMock;
     let bitbucketMock;
+    let bitbucketRequestData;
     const project = 'PROJECT_1';
     const repository = 'rep_1';
     const prId = 502;
@@ -79,7 +80,7 @@ lab.experiment('Stash Notification', () => {
             }
         }
     };
-    const newPrTitle = `[P${jiraData.fields.priority.id}] ${jiraData.fields.summary}`;
+    const newPrTitle = `[P${jiraData.fields.priority.id}] ${key} ${jiraData.fields.summary}`;
     const bitbucketData = {
         id: prId,
         'version': version + 1,
@@ -98,6 +99,21 @@ lab.experiment('Stash Notification', () => {
 
     lab.beforeEach((done) => {
 
+        bitbucketRequestData = {
+            id: prId.toString(),
+            title: newPrTitle,
+            version: version.toString(),
+            reviewers: [{
+                user: {
+                    name: 'reviewer1'
+                }
+            }, {
+                user: {
+                    name: 'user'
+                }
+            }]
+        };
+
         request = {
             method: 'GET',
             url: `/bjproxy/notification?PULL_REQUEST_ID=${prId}&PULL_REQUEST_VERSION=${version}&PULL_REQUEST_FROM_BRANCH=refs/heads/bugfix/${key}-styling-for-accordion-for-related2&PULL_REQUEST_FROM_REPO_PROJECT_KEY=${project}&PULL_REQUEST_FROM_REPO_SLUG=${repository}&PULL_REQUEST_REVIEWERS_SLUG=${reviewers}`
@@ -112,12 +128,8 @@ lab.experiment('Stash Notification', () => {
             .reply(200, jiraData)
             .log(console.log);
 
-        bitbucketMock = Nock('https://' + Config.get('/bitbucket/host') + ':' + Config.get('/bitbucket/port'), {
-            id: prId,
-            title: newPrTitle,
-            version
-        })
-            .put(`/rest/api/1.0/projects/${project}/repos/${repository}/pull-requests/${prId}`)
+        bitbucketMock = Nock('https://' + Config.get('/bitbucket/host') + ':' + Config.get('/bitbucket/port'))
+            .put(`/rest/api/1.0/projects/${project}/repos/${repository}/pull-requests/${prId}`, bitbucketRequestData)
             .basicAuth({
                 user: Config.get('/bitbucket/user'),
                 pass: Config.get('/bitbucket/pass')
@@ -147,6 +159,7 @@ lab.experiment('Stash Notification', () => {
 
     lab.test('it updates PR with Jira title when no reviewers', (done) => {
 
+        delete bitbucketRequestData.reviewers;
         request.url = `/bjproxy/notification?PULL_REQUEST_ID=${prId}&PULL_REQUEST_VERSION=${version}&PULL_REQUEST_FROM_BRANCH=refs/heads/bugfix/${key}-styling-for-accordion-for-related2&PULL_REQUEST_FROM_REPO_PROJECT_KEY=${project}&PULL_REQUEST_FROM_REPO_SLUG=${repository}&PULL_REQUEST_REVIEWERS_SLUG=${''}`;
 
         server.inject(request, (response) => {

@@ -76,7 +76,7 @@ class bitbucketClient {
             version: pr.version,
             reviewers: pr.reviewers
         });
-        console.log('Bitbucker request: ' + requestBody);
+        console.log('Bitbucket request: ' + requestBody);
 
         // write data to request body
         req.write(requestBody);
