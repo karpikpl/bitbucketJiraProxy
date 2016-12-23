@@ -1,12 +1,51 @@
 /*jshint esversion: 6, node: true*/
 'use strict';
 
+const Proxyquire = require('proxyquire').noPreserveCache();
 const Lab = require('lab');
 const Code = require('code');
-const Config = require('../../test-config');
 const Hapi = require('hapi');
-const IndexPlugin = require('../../../server/api/index');
-const Nock = require('nock');
+const ConfigMockData = {
+    '/port/web': 9090
+};
+const ConfigMock = {
+
+    get(key) {
+
+        return ConfigMockData[key];
+    }
+};
+let jiraData;
+let bitbucketData;
+const BitbucketMock = {
+    updatePR(pr, callback) {
+
+        return callback(null, {
+            data: bitbucketData,
+            statusCode: 200
+        });
+    }
+};
+const JiraMock = {
+    getJira(key, callback) {
+
+        return callback(null, {
+            data: jiraData,
+            statusCode: 200
+        });
+    }
+};
+const IndexPlugin = Proxyquire('../../../server/api/index', {
+    '../../APIs/bitbucket/bitbucket': function Bitbucket() {
+
+        return BitbucketMock;
+    },
+    '../../APIs/jira/jira': function JIRA() {
+
+        return JiraMock;
+    },
+    '../../config': ConfigMock
+});
 
 const lab = exports.lab = Lab.script();
 let request;
@@ -18,7 +57,7 @@ lab.beforeEach((done) => {
     const plugins = [IndexPlugin];
     server = new Hapi.Server();
     server.connection({
-        port: Config.get('/port/web')
+        port: 9090
     });
     server.register(plugins, (err) => {
 
@@ -57,8 +96,6 @@ lab.experiment('Index Plugin', () => {
 
 lab.experiment('Stash Notification', () => {
 
-    let jiraMock;
-    let bitbucketMock;
     let bitbucketRequestData;
     const project = 'PROJECT_1';
     const repository = 'rep_1';
@@ -66,7 +103,7 @@ lab.experiment('Stash Notification', () => {
     const version = 99;
     const key = 'HA-8714';
     const reviewers = 'reviewer1,user';
-    const jiraData = {
+    jiraData = {
         key,
         'fields': {
             'summary': 'Rating manager mock rejects request with valid exchange rate values',
@@ -81,7 +118,7 @@ lab.experiment('Stash Notification', () => {
         }
     };
     const newPrTitle = `[P${jiraData.fields.priority.id}] ${key} ${jiraData.fields.summary}`;
-    const bitbucketData = {
+    bitbucketData = {
         id: prId,
         'version': version + 1,
         'title': newPrTitle,
@@ -119,24 +156,6 @@ lab.experiment('Stash Notification', () => {
             url: `/bjproxy/notification?PULL_REQUEST_ID=${prId}&PULL_REQUEST_VERSION=${version}&PULL_REQUEST_FROM_BRANCH=refs/heads/bugfix/${key}-styling-for-accordion-for-related2&PULL_REQUEST_FROM_REPO_PROJECT_KEY=${project}&PULL_REQUEST_FROM_REPO_SLUG=${repository}&PULL_REQUEST_REVIEWERS_SLUG=${reviewers}`
         };
 
-        jiraMock = Nock('https://' + Config.get('/jira/host') + ':' + Config.get('/jira/port'))
-            .get(`/rest/api/2/issue/${key}?fields=summary,created,status,aggregateprogress,priority,issuetype,customfield_11500,customfield_11700,customfield_10008`)
-            .basicAuth({
-                user: Config.get('/jira/user'),
-                pass: Config.get('/jira/pass')
-            })
-            .reply(200, jiraData)
-            .log(console.log);
-
-        bitbucketMock = Nock('https://' + Config.get('/bitbucket/host') + ':' + Config.get('/bitbucket/port'))
-            .put(`/rest/api/1.0/projects/${project}/repos/${repository}/pull-requests/${prId}`, bitbucketRequestData)
-            .basicAuth({
-                user: Config.get('/bitbucket/user'),
-                pass: Config.get('/bitbucket/pass')
-            })
-            .reply(200, bitbucketData)
-            .log(console.log);
-
         done();
     });
 
@@ -145,9 +164,6 @@ lab.experiment('Stash Notification', () => {
 
         server.inject(request, (response) => {
 
-            Code.expect(jiraMock.isDone()).to.be.true();
-            Code.expect(bitbucketMock.isDone()).to.be.true();
-            Code.expect(response.statusCode).to.equal(200);
             Code.expect(response.result).to.equal({
                 data: bitbucketData,
                 statusCode: 200
@@ -164,8 +180,6 @@ lab.experiment('Stash Notification', () => {
 
         server.inject(request, (response) => {
 
-            Code.expect(jiraMock.isDone()).to.be.true();
-            Code.expect(bitbucketMock.isDone()).to.be.true();
             Code.expect(response.statusCode).to.equal(200);
             Code.expect(response.result).to.equal({
                 data: bitbucketData,
@@ -202,8 +216,6 @@ lab.experiment('Stash Notification', () => {
 
             server.inject(request, (response) => {
 
-                Code.expect(jiraMock.isDone()).to.be.false();
-                Code.expect(bitbucketMock.isDone()).to.be.false();
                 Code.expect(response.statusCode).to.equal(400);
 
                 done();
@@ -225,19 +237,16 @@ lab.experiment('Stash Notification', () => {
         lab.test('it returns 400 (Bad Request) when Jira could not be found', (done) => {
 
             request.url = `/bjproxy/notification?PULL_REQUEST_ID=${prId}&PULL_REQUEST_VERSION=${version}&PULL_REQUEST_FROM_BRANCH=refs/heads/bugfix/${'HA-1'}-styling-for-accordion-for-related2&PULL_REQUEST_FROM_REPO_PROJECT_KEY=${project}&PULL_REQUEST_FROM_REPO_SLUG=${repository}&PULL_REQUEST_REVIEWERS_SLUG=${reviewers}`;
-            jiraMock = Nock('https://' + Config.get('/jira/host') + ':' + Config.get('/jira/port'))
-                .get(`/rest/api/2/issue/${'HA-1'}?fields=summary,created,status,aggregateprogress,priority,issuetype,customfield_11500,customfield_11700,customfield_10008`)
-                .basicAuth({
-                    user: Config.get('/jira/user'),
-                    pass: Config.get('/jira/pass')
-                })
-                .reply(testCase.code, testCase.data)
-                .log(console.log);
+            JiraMock.getJira = (_, callback) => {
+
+                return callback(null, {
+                    data: testCase.data,
+                    statusCode: testCase.code
+                });
+            };
 
             server.inject(request, (response) => {
 
-                Code.expect(jiraMock.isDone()).to.be.true();
-                Code.expect(bitbucketMock.isDone()).to.be.false();
                 Code.expect(response.statusCode).to.equal(400);
 
                 done();
@@ -248,19 +257,14 @@ lab.experiment('Stash Notification', () => {
     lab.test('it returns 400 (Bad Request) when Jira server responds with error', (done) => {
 
         request.url = `/bjproxy/notification?PULL_REQUEST_ID=${prId}&PULL_REQUEST_VERSION=${version}&PULL_REQUEST_FROM_BRANCH=refs/heads/bugfix/${'HA-1'}-styling-for-accordion-for-related2&PULL_REQUEST_FROM_REPO_PROJECT_KEY=${project}&PULL_REQUEST_FROM_REPO_SLUG=${repository}&PULL_REQUEST_REVIEWERS_SLUG=${reviewers}`;
-        jiraMock = Nock('https://' + Config.get('/jira/host') + ':' + Config.get('/jira/port'))
-            .get(`/rest/api/2/issue/${'HA-1'}?fields=summary,created,status,aggregateprogress,priority,issuetype,customfield_11500,customfield_11700,customfield_10008`)
-            .basicAuth({
-                user: Config.get('/jira/user'),
-                pass: Config.get('/jira/pass')
-            })
-            .replyWithError('something awful happened')
-            .log(console.log);
+
+        JiraMock.getJira = (_, callback) => {
+
+            return callback('something awful happened');
+        };
 
         server.inject(request, (response) => {
 
-            Code.expect(jiraMock.isDone()).to.be.true();
-            Code.expect(bitbucketMock.isDone()).to.be.false();
             Code.expect(response.statusCode).to.equal(400);
 
             done();

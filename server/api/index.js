@@ -128,8 +128,6 @@ exports.register = function (server, options, next) {
             const key = request.params.key;
             const apiKey = request.query.apiKey || request.headers.apikey;
 
-            console.log(request.headers);
-
             if (Config.get('/apiKey') && apiKey !== Config.get('/apiKey')) {
                 return reply(Boom.unauthorized('Invalid apiKey'));
             }

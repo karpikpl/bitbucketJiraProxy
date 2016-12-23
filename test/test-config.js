@@ -11,7 +11,7 @@ const criteria = {
 
 const config = {
     $meta: 'This file configures the proxy.',
-    projectName: 'stashJiraproxy',
+    projectName: 'stashJiraproxy - test config',
     port: {
         web: {
             $filter: 'env',

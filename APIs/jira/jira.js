@@ -12,6 +12,7 @@ class jiraClient {
 
     constructor() {
 
+        console.log('configuring Jira using config for ' + Config.get('/projectName'));
         const jiraUser = Config.get('/jira/user');
         const jiraPass = Config.get('/jira/pass');
         this.serverUrl = Config.get('/jira/host');

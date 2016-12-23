@@ -1,6 +1,6 @@
 {
     "$meta": "This file contains configuration for testing",
-    "projectName": "stashJiraproxyTest",
+    "projectName": "stashJiraproxyTest - test config Data",
     "port": {
         "web": {
             "$filter": "env",

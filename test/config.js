@@ -47,7 +47,7 @@ lab.experiment('Config', () => {
         const result = Config.loadConfigSync();
 
         // Assert
-        Code.expect(result.get('/projectName')).to.equal('stashJiraproxyTest');
+        Code.expect(result.get('/projectName')).to.equal('stashJiraproxyTest - test config Data');
         done();
     });
 
@@ -62,7 +62,7 @@ lab.experiment('Config', () => {
         const result = Config.loadConfigSync();
 
         // Assert
-        Code.expect(result.get('/projectName')).to.equal('stashJiraproxyTest');
+        Code.expect(result.get('/projectName')).to.equal('stashJiraproxyTest - test config Data');
         done();
     });
 

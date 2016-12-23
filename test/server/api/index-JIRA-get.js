@@ -1,32 +1,23 @@
 /*jshint esversion: 6, node: true*/
 'use strict';
 
-const Proxyquire = require('proxyquire').noPreserveCache();
+const Proxyquire = require('proxyquire');
 const Lab = require('lab');
 const Code = require('code');
 const Hapi = require('hapi');
 let statusCode = 200;
 
 const MockConfig = {};
-const BitbucketMock = {
-    getPR(id, project, repository, callback) {
+const BitbucketMock = {};
+const JiraMock = {
+    getJira(key, callback) {
 
         return callback(null, {
             data: {
-                id,
-                project,
-                repository
+                key
             },
             statusCode
         });
-    }
-};
-const JiraMock = {};
-const ConfigMock = {
-
-    get(key) {
-
-        return MockConfig[key];
     }
 };
 const IndexPlugin = Proxyquire('../../../server/api/index', {
@@ -38,7 +29,13 @@ const IndexPlugin = Proxyquire('../../../server/api/index', {
 
         return JiraMock;
     },
-    '../../config': ConfigMock
+    '../../config': {
+
+        get(key) {
+
+            return MockConfig[key];
+        }
+    }
 });
 
 
@@ -63,29 +60,27 @@ lab.beforeEach((done) => {
     });
 });
 
-lab.experiment('Get PR', () => {
+lab.experiment('Get JIRA', () => {
 
     lab.beforeEach((done) => {
 
         request = {
             method: 'GET',
-            url: '/bjproxy/pullRequest/5'
+            url: '/bjproxy/jira/ABC-12'
         };
 
         done();
     });
 
 
-    lab.test('it returns the pull request data for harmony when only id provided', (done) => {
+    lab.test('it returns jira data', (done) => {
 
-        request.url = '/bjproxy/pullRequest/5';
+        request.url = '/bjproxy/jira/ABC-12';
 
         server.inject(request, (response) => {
 
             Code.expect(response.result).to.equal({
-                id: '5',
-                project: 'EN',
-                repository: 'harmony'
+                key: 'ABC-12'
             });
             Code.expect(response.statusCode).to.equal(statusCode);
 
@@ -93,19 +88,15 @@ lab.experiment('Get PR', () => {
         });
     });
 
-    lab.test('it returns the pull request data when apiKey matches one from config', (done) => {
+    lab.test('it returns jira data and status from jira', (done) => {
 
-        const project = 'XY';
-        const repository = 'R_X';
-        statusCode = 418;
-        request.url = `/bjproxy/pullRequest/5?project=${project}&repository=${repository}`;
+        statusCode = 404;
+        request.url = '/bjproxy/jira/ABC-12';
 
         server.inject(request, (response) => {
 
             Code.expect(response.result).to.equal({
-                id: '5',
-                project,
-                repository
+                key: 'ABC-12'
             });
             Code.expect(response.statusCode).to.equal(statusCode);
 
@@ -113,10 +104,10 @@ lab.experiment('Get PR', () => {
         });
     });
 
-    lab.test('it returns error when bitbucket call fails', (done) => {
+    lab.test('it returns error when jira call fails', (done) => {
 
-        request.url = '/bjproxy/pullRequest/5';
-        BitbucketMock.getPR = (id, project, repository, callback) => {
+        request.url = '/bjproxy/jira/ABC-12';
+        JiraMock.getJira = (key, callback) => {
 
             return callback('very big error');
         };
@@ -131,7 +122,7 @@ lab.experiment('Get PR', () => {
 
     lab.test('it returns Unauthorized when apiKey doesnt match', (done) => {
 
-        request.url = '/bjproxy/pullRequest/5';
+        request.url = '/bjproxy/jira/ABC-12';
         MockConfig['/apiKey'] = 'my-123-key';
 
         server.inject(request, (response) => {
