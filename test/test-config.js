@@ -29,7 +29,8 @@ const config = {
         user: 'usr2',
         pass: 'pwd2',
         host: 'jira.host.here',
-        port: 443
+        port: 443,
+        keyRegex: 'HA-\\d+'
     }
 };
 

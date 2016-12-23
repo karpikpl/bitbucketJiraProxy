@@ -7,7 +7,7 @@ class jiraClient {
 
     static getJiraKeys(text) {
 
-        return text.match(/HA-\d+/gi);
+        return text.match(new RegExp(Config.get('/jira/keyRegex'), 'gi'));
     }
 
     constructor() {
@@ -43,8 +43,6 @@ class jiraClient {
 
         const req = Https.request(options, (res) => {
 
-            // res.statusCode
-            // res.headers
             res.setEncoding('utf8');
             res.on('data', (chunk) => {
 

@@ -30,7 +30,8 @@ const config = {
         user: 'usr',
         pass: 'pwd',
         host: '[jira-host]',
-        port: 443
+        port: 443,
+        keyRegex: 'HA-\\d+'
     }
 };
 
