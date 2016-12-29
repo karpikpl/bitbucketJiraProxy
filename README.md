@@ -55,3 +55,7 @@ In order to run in debug mode - clone https://github.com/tomasbjerre/pull-reques
 ## License
 
 MIT
+
+## todo
+* use jira API https://github.com/steves/node-jira
+* use bitbucket API https://github.com/markmssd/bitbucket-server-nodejs

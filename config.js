@@ -1,4 +1,4 @@
-/*jshint esversion: 6, node: true*/
+  /*jshint esversion: 6, node: true*/
 'use strict';
 
 const Confidence = require('confidence');
