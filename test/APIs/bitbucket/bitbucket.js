@@ -33,16 +33,23 @@ lab.beforeEach((done) => {
 
 lab.experiment('bitbucket', () => {
 
-    lab.test('getPr returns pull request data', (done) => {
+    lab.test.only('getPr returns pull request data', (done) => {
 
         // Arrange
         bitbucketMock = Nock('https://' + Config.get('/bitbucket/host') + ':' + Config.get('/bitbucket/port'))
-            .get(`/rest/api/1.0/projects/${project}/repos/${repository}/pull-requests/${prId}`)
-            .basicAuth({
-                user: Config.get('/bitbucket/user'),
-                pass: Config.get('/bitbucket/pass')
+            .get(`/rest/api/1.0/projects/${project}/repos/${repository}/pull-requests/${prId}`, (body) => {
+                console.log('body ' + body);
+                return true;
             })
-            .reply(200, bitbucketData)
+            // .basicAuth({
+            //     user: Config.get('/bitbucket/user'),
+            //     pass: Config.get('/bitbucket/pass')
+            // })
+            .reply(function(uri, requestBody) {
+                console.log('path:', this.req.path);
+                console.log('headers:', this.req.headers);
+            })
+            //.reply(200, bitbucketData)
             .log(console.log);
 
         // Act
@@ -61,10 +68,10 @@ lab.experiment('bitbucket', () => {
         const newTitle = 'new title';
         const version = 99;
         bitbucketMock = Nock('https://' + Config.get('/bitbucket/host') + ':' + Config.get('/bitbucket/port'), {
-            id: prId,
-            title: newTitle,
-            version
-        })
+                id: prId,
+                title: newTitle,
+                version
+            })
             .put(`/rest/api/1.0/projects/${project}/repos/${repository}/pull-requests/${prId}`)
             .basicAuth({
                 user: Config.get('/bitbucket/user'),

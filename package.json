@@ -27,6 +27,7 @@
     "hapi": "15.x.x",
     "hoek": "4.x.x",
     "jade": "1.x.x",
+    "node-fetch": "^1.6.3",
     "vision": "4.x.x",
     "visionary": "6.x.x"
   },

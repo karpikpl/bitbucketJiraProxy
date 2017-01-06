@@ -2,6 +2,7 @@
 'use strict';
 const Config = require('../../config');
 const Https = (Config.get('/bitbucket/https') || Config.get('/bitbucket/port') === 443) ? require('https') : require('http');
+const Fetch = require('node-fetch');
 
 class bitbucketClient {
 
@@ -20,7 +21,7 @@ class bitbucketClient {
             path: `${Config.get('/bitbucket/path') || ''}/rest/api/1.0/projects/${project}/repos/${repository}/pull-requests/${id}`,
             method,
             headers: {
-                Authorization: this.auth,
+                'Authorization': this.auth,
                 'Content-Type': 'application/json'
             }
         };
@@ -30,25 +31,37 @@ class bitbucketClient {
 
         const options = this.createRequestOptions('GET', id, project, repository);
 
-        console.log(`Trying to read PR from ${options.host}:${options.port}${options.path}`);
+        console.log(`Trying to read PR from https://${options.host}:${options.port}${options.path}`);
 
-        const req = Https.request(options, (res) => {
-
-            // res.statusCode
-            // res.headers
-            res.setEncoding('utf8');
-            res.on('data', (chunk) => {
-
-                callback(null, { data:JSON.parse(chunk), statusCode: res.statusCode });
+        const opts = { method: 'GET', headers: options.headers };
+        Fetch(`https://${options.host}:${options.port}${options.path}`, opts)
+            .then((res) => {
+                return res.json();
+            })
+            .then((json) => {
+                return callback(null, { data: json, statusCode: res.statusCode });
+            })
+            .catch((err) => {
+                return callback(err);
             });
-        });
 
-        req.on('error', (e) => {
+        // const req = Https.request(options, (res) => {
 
-            callback(e);
-        });
+        //     // res.statusCode
+        //     // res.headers
+        //     res.setEncoding('utf8');
+        //     res.on('data', (chunk) => {
 
-        req.end();
+        //         callback(null, { data: JSON.parse(chunk), statusCode: res.statusCode });
+        //     });
+        // });
+
+        // req.on('error', (e) => {
+
+        //     callback(e);
+        // });
+
+        // req.end();
     }
 
     updatePR(pr, callback) {

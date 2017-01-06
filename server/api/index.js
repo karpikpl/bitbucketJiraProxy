@@ -7,12 +7,12 @@ const jiraClient = new JIRA();
 const Boom = require('boom');
 const Config = require('../../config');
 
-exports.register = function (server, options, next) {
+exports.register = function(server, options, next) {
 
     server.route({
         method: 'GET',
         path: '/bjproxy',
-        handler: function (request, reply) {
+        handler: function(request, reply) {
 
             reply({
                 message: `welcome to the Stash & JIRA proxy\nJira: ${Config.get('/jira/host')}\nBitbucket: ${Config.get('/bitbucket/host')}`
@@ -23,7 +23,7 @@ exports.register = function (server, options, next) {
     server.route({
         method: 'GET',
         path: '/bjproxy/notification',
-        handler: function (request, reply) {
+        handler: function(request, reply) {
 
             const id = request.query.PULL_REQUEST_ID;
             //const title = request.query.PULL_REQUEST_TITLE;
@@ -96,13 +96,14 @@ exports.register = function (server, options, next) {
     server.route({
         method: 'GET',
         path: '/bjproxy/pullRequest/{id}',
-        handler: function (request, reply) {
+        handler: function(request, reply) {
 
             const id = request.params.id;
             const project = request.query.project || 'EN';
             const repository = request.query.repository || 'harmony';
             const apiKey = request.query.apiKey || request.headers.apikey;
 
+            console.log('getting PR');
 
             if (Config.get('/apiKey') && apiKey !== Config.get('/apiKey')) {
                 return reply(Boom.unauthorized('Invalid apiKey'));
@@ -123,7 +124,7 @@ exports.register = function (server, options, next) {
     server.route({
         method: 'GET',
         path: '/bjproxy/jira/{key}',
-        handler: function (request, reply) {
+        handler: function(request, reply) {
 
             const key = request.params.key;
             const apiKey = request.query.apiKey || request.headers.apikey;
