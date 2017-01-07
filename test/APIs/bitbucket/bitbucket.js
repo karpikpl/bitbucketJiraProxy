@@ -36,14 +36,19 @@ lab.experiment('bitbucket', () => {
     lab.test('getPr returns pull request data', (done) => {
 
         // Arrange
-        bitbucketMock = Nock('https://' + Config.get('/bitbucket/host') + ':' + Config.get('/bitbucket/port'))
-            .get(`/rest/api/1.0/projects/${project}/repos/${repository}/pull-requests/${prId}`)
-            .basicAuth({
-                user: Config.get('/bitbucket/user'),
-                pass: Config.get('/bitbucket/pass')
-            })
-            .reply(200, bitbucketData)
-            .log(console.log);
+        bitbucketMock = Nock('https://' + Config.get('/bitbucket/host') + ':' + Config.get('/bitbucket/port'), {
+            reqheaders: {
+                'authorization': function (headerValue) {
+
+                    // verify that header was sent correctly
+                    const auth = 'Basic ' + new Buffer(Config.get('/bitbucket/user') + ':' + Config.get('/bitbucket/pass')).toString('base64');
+                    return headerValue === auth;
+                }
+            }
+        })
+        .get(`/rest/api/1.0/projects/${project}/repos/${repository}/pull-requests/${prId}`)
+        .reply(200, bitbucketData)
+        .log(console.log);
 
         // Act
         bitbucketClient.getPR(prId, project, repository, (err, data) => {
@@ -51,7 +56,10 @@ lab.experiment('bitbucket', () => {
             // Assert
             Code.expect(err).to.be.null();
             Code.expect(bitbucketMock.isDone()).to.be.true();
-            Code.expect(data).to.be.equal({ data: bitbucketData, statusCode: 200 });
+            Code.expect(data).to.be.equal({
+                data: bitbucketData,
+                statusCode: 200
+            });
             done();
         });
     });
@@ -85,7 +93,10 @@ lab.experiment('bitbucket', () => {
             // Assert
             Code.expect(err).to.be.null();
             Code.expect(bitbucketMock.isDone()).to.be.true();
-            Code.expect(data).to.be.equal({ data: bitbucketData, statusCode: 200 });
+            Code.expect(data).to.be.equal({
+                data: bitbucketData,
+                statusCode: 200
+            });
             done();
         });
     });

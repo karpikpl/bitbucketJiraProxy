@@ -33,6 +33,8 @@ exports.register = function (server, options, next) {
             const repository = request.query.PULL_REQUEST_FROM_REPO_SLUG;
             const reviewersSlugs = request.query.PULL_REQUEST_REVIEWERS_SLUG;
 
+            console.log('Notification received with : ' + JSON.stringify(request.query));
+
             if (!id || !version || !branch || !project || !repository || reviewersSlugs === undefined) {
                 return reply(Boom.badRequest('Not all required parameters provided. Check documentation for API description'));
             }
@@ -103,6 +105,7 @@ exports.register = function (server, options, next) {
             const repository = request.query.repository || 'harmony';
             const apiKey = request.query.apiKey || request.headers.apikey;
 
+            console.log('getting PR');
 
             if (Config.get('/apiKey') && apiKey !== Config.get('/apiKey')) {
                 return reply(Boom.unauthorized('Invalid apiKey'));
