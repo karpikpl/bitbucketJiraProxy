@@ -34,34 +34,21 @@ class bitbucketClient {
         console.log(`Trying to read PR from https://${options.host}:${options.port}${options.path}`);
 
         const opts = { method: 'GET', headers: options.headers };
+        let statusCode;
         Fetch(`https://${options.host}:${options.port}${options.path}`, opts)
             .then((res) => {
+
+                statusCode = res.status;
                 return res.json();
             })
             .then((json) => {
-                return callback(null, { data: json, statusCode: res.statusCode });
+
+                return callback(null, { data: json, statusCode });
             })
-            .catch((err) => {
-                return callback(err);
+            .catch(() => {
+
+                callback('error fetching data from bitbucket');
             });
-
-        // const req = Https.request(options, (res) => {
-
-        //     // res.statusCode
-        //     // res.headers
-        //     res.setEncoding('utf8');
-        //     res.on('data', (chunk) => {
-
-        //         callback(null, { data: JSON.parse(chunk), statusCode: res.statusCode });
-        //     });
-        // });
-
-        // req.on('error', (e) => {
-
-        //     callback(e);
-        // });
-
-        // req.end();
     }
 
     updatePR(pr, callback) {
