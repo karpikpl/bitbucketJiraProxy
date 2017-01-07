@@ -45,9 +45,9 @@ class bitbucketClient {
 
                 return callback(null, { data: json, statusCode });
             })
-            .catch(() => {
+            .catch((err) => {
 
-                callback('error fetching data from bitbucket');
+                callback('error fetching data from bitbucket ' + err);
             });
     }
 
